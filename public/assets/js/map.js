@@ -20,6 +20,9 @@
     function sync(l1, l2) {
       latInput.value = l1.toFixed(6);
       lngInput.value = l2.toFixed(6);
+      latInput.dispatchEvent(new Event('input', { bubbles: true }));
+      lngInput.dispatchEvent(new Event('input', { bubbles: true }));
+      window.dispatchEvent(new CustomEvent('ms:loc', { detail: { lat: latInput.value, lng: lngInput.value } }));
       document.getElementById('latlng-label').textContent = `${l1.toFixed(5)}, ${l2.toFixed(5)}`;
       marker.setLatLng([l1, l2]);
       circle.setLatLng([l1, l2]);

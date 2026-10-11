@@ -2,13 +2,15 @@
 use App\Core\View;
 $fmt = fn($n) => 'Rp' . number_format((int)$n, 0, ',', '.');
 $old = $old ?? [];
+$bootPackages = array_map(fn($p) => ['id' => $p['id'], 'name' => $p['name'], 'price' => (int)$p['price'], 'description' => $p['description'] ?? ''], $packages ?? []);
 ?>
+<div id="vue-order">
 <h1 class="text-2xl font-bold"><i class="fa-solid fa-truck-fast"></i> Pesan Toilet</h1>
 <p class="muted text-sm">Geser pin → pilih paket → konfirmasi. Kurang dari semenit.</p>
 
 <?php if (!empty($errors)): ?><div class="card p-3 mt-3 text-sm" style="border-color:#5c2424"><?php foreach ($errors as $k => $e): ?><div style="color:#F87171"><?= View::e($k) ?>: <?= View::e($e) ?></div><?php endforeach; ?></div><?php endif; ?>
 
-<form id="order-form" method="POST" action="/orders" class="grid md:grid-cols-2 gap-4 mt-4">
+<form id="order-form" method="POST" action="/orders" class="grid md:grid-cols-2 gap-4 mt-4" @submit="onSubmit">
   <?= \App\Core\Csrf::field() ?>
   <input type="hidden" name="idempotency_key" value="<?= View::e($idem ?? '') ?>">
   <input type="hidden" name="package_id" id="package_id" value="<?= View::e($old['package_id'] ?? ($packages[0]['id'] ?? '')) ?>">
@@ -50,9 +52,15 @@ $old = $old ?? [];
         <label class="flex gap-2 items-center card-2 p-2 cursor-pointer"><input type="radio" name="payment_method" value="<?= $k ?>" <?= (($old['payment_method'] ?? 'cash_on_arrival') === $k) ? 'checked' : '' ?>> <?= View::e($label) ?></label>
         <?php endforeach; ?>
       </div>
-      <div id="order-summary" class="card-2 p-3 mt-3"></div>
-      <button type="submit" class="btn btn-primary w-full mt-3"><i class="fa-solid fa-toilet"></i> Pesan Sekarang</button>
+      <div id="order-summary" class="card-2 p-3 mt-3">
+        <div v-if="selected" class="flex justify-between text-sm"><span>{{ selected.name }}</span><strong>{{ rupiah(selected.price) }}</strong></div>
+        <div v-else class="muted text-xs">Pilih paket…</div>
+        <div class="muted text-xs mt-1">SIMULASI — harga fiktif, dihitung ulang di server. <button type="button" @click="refreshPackages" class="underline" :disabled="loadingPkg">{{ loadingPkg ? 'Memuat…' : 'Refresh harga' }}</button><span v-if="lat"> • Pin: {{ lat }}, {{ lng }}</span></div>
+      </div>
+      <button type="submit" class="btn btn-primary w-full mt-3" :disabled="submitting"><i class="fa-solid fa-toilet"></i> {{ submitting ? 'Mengirim…' : 'Pesan Sekarang' }}</button>
       <p class="muted text-xs mt-2">Dengan menekan tombol, kamu menyetujui bahwa ini SIMULASI hiburan. Tidak ada toilet beneran yang datang.</p>
     </div>
   </div>
 </form>
+<script>window.__BOOT_ORDER__ = <?= json_encode(['packages' => $bootPackages, 'packageId' => (string)($old['package_id'] ?? ($packages[0]['id'] ?? '')), 'paymentMethod' => $old['payment_method'] ?? 'cash_on_arrival'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;</script>
+</div>

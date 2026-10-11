@@ -41,25 +41,38 @@
 
     const statusLabel = { pending: 'Baru', searching_driver: 'Mencari armada', assigned: 'Armada ditetapkan', driver_arriving: 'Armada meluncur', arrived: 'Armada tiba', in_service: 'Layanan berjalan', completed: 'Selesai', cancelled: 'Dibatalkan' };
 
+    // Dipakai Vue (vue-app.js) maupun fallback vanilla: update Leaflet + DOM dari data tracking.
+    async function applyUpdate(d) {
+      if (!d) return;
+      vehMarker.setLatLng([d.vehicle_lat, d.vehicle_lng]);
+      await drawRoute(d.origin_lat, d.origin_lng);
+      // Jika fallback garis lurus, update ujung garis ke posisi terkini
+      if (routeLine && routeLine.getLatLngs().length === 2) routeLine.setLatLngs([[d.vehicle_lat, d.vehicle_lng], [destLat, destLng]]);
+      const stEl = document.getElementById('t-status');
+      if (stEl) stEl.textContent = statusLabel[d.status] || d.status;
+      const bar = document.getElementById('t-progress');
+      if (bar) bar.style.width = Math.round(d.progress * 100) + '%';
+      const lbl = document.getElementById('t-progress-label');
+      if (lbl) lbl.textContent = Math.round(d.progress * 100) + '% • ' + d.distance_km + ' km lagi • ETA ±' + d.eta_min + ' mnt (simulasi)';
+      // Timeline dibiarkan Vue yang render bila #vue-tracking aktif agar tidak dobel.
+      const tl = document.getElementById('timeline');
+      if (tl && d.logs && !document.getElementById('vue-tracking')) {
+        tl.innerHTML = d.logs.map(l => `<li class="flex gap-2 text-sm py-1"><span class="badge">${MS.fmtDate(l.created_at)}</span><span>${l.old_status || '—'} → <strong>${l.new_status}</strong>${l.note ? ' • ' + l.note : ''}</span></li>`).join('');
+      }
+    }
+    window.MS_TRACK = { update: applyUpdate };
+
+    // Jika Vue aktif, polling diurus vue-app.js (memanggil MS_TRACK.update). Cegah dobel-poll.
+    if (document.getElementById('vue-tracking') && window.Vue) return;
+
     async function poll() {
       try {
         const res = await fetch(`/api/tracking/${code}`, { headers: { 'X-CSRF-TOKEN': csrf } });
         const j = await res.json();
         if (!res.ok) throw new Error(j.message || 'gagal');
-        const d = j.data;
-        vehMarker.setLatLng([d.vehicle_lat, d.vehicle_lng]);
-        await drawRoute(d.origin_lat, d.origin_lng);
-        // Jika fallback garis lurus, update ujung garis ke posisi terkini
-        if (routeLine && routeLine.getLatLngs().length === 2) routeLine.setLatLngs([[d.vehicle_lat, d.vehicle_lng], [destLat, destLng]]);
-        document.getElementById('t-status').textContent = statusLabel[d.status] || d.status;
-        document.getElementById('t-progress').style.width = Math.round(d.progress * 100) + '%';
-        document.getElementById('t-progress-label').textContent = Math.round(d.progress * 100) + '% • ' + d.distance_km + ' km lagi • ETA ±' + d.eta_min + ' mnt (simulasi)';
-        const tl = document.getElementById('timeline');
-        if (tl && d.logs) {
-          tl.innerHTML = d.logs.map(l => `<li class="flex gap-2 text-sm py-1"><span class="badge">${MS.fmtDate(l.created_at)}</span><span>${l.old_status || '—'} → <strong>${l.new_status}</strong>${l.note ? ' • ' + l.note : ''}</span></li>`).join('');
-        }
-        if (['completed', 'cancelled'].includes(d.status)) {
-          document.getElementById('poll-note').textContent = 'Perjalanan berakhir (' + d.status + '). Polling dihentikan.';
+        await applyUpdate(j.data);
+        if (['completed', 'cancelled'].includes(j.data.status)) {
+          document.getElementById('poll-note').textContent = 'Perjalanan berakhir (' + j.data.status + '). Polling dihentikan.';
           return; // stop
         }
       } catch (e) {

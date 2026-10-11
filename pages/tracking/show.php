@@ -13,20 +13,25 @@ $cancellable = in_array($order['status'], ['pending', 'searching_driver', 'assig
   <?php endif; ?></div>
 </div>
 
+<div id="vue-tracking" data-code="<?= View::e($order['order_code']) ?>" data-status="<?= View::e($order['status']) ?>" data-progress="0">
 <div class="grid md:grid-cols-3 gap-4 mt-4">
   <div class="md:col-span-2">
     <div id="track-map" data-code="<?= View::e($order['order_code']) ?>" data-dlat="<?= View::e($order['destination_latitude']) ?>" data-dlng="<?= View::e($order['destination_longitude']) ?>" style="height:380px"></div>
-    <div class="flex justify-between text-xs muted mt-1"><span id="route-note">Memuat rute...</span><span id="poll-note">Live update tiap 5 dtk (simulasi).</span></div>
-    <div class="card p-3 mt-2"><div class="text-sm" id="t-progress-label">Memuat...</div><div class="h-2 bg-[#292929] rounded mt-2"><div id="t-progress" class="h-2 rounded bg-[#D4D4D4]" style="width:0%"></div></div></div>
+    <div class="flex justify-between text-xs muted mt-1"><span id="route-note">Memuat rute...</span><span id="poll-note"><span v-if="stopped">Perjalanan berakhir ({{ status }}). Polling dihentikan.</span><span v-else>Live update tiap 5 dtk (simulasi).</span><span v-if="err" class="block" style="color:#F87171">{{ err }}</span></span></div>
+    <div class="card p-3 mt-2"><div class="text-sm" id="t-progress-label"><span v-if="loading">Memuat...</span><span v-else>{{ pct }}% • {{ distanceKm }} km lagi • ETA ±{{ etaMin }} mnt (simulasi)</span></div><div class="h-2 bg-[#292929] rounded mt-2"><div id="t-progress" class="h-2 rounded bg-[#D4D4D4]" :style="{ width: pct + '%' }"></div></div></div>
   </div>
   <div class="space-y-3">
     <div class="card p-4 text-sm">
       <div class="muted text-xs">ARMADA (SIMULASI)</div>
-      <div class="font-bold"><?= View::e($vehicle['name'] ?? 'Mencari armada...') ?></div>
-      <div class="muted"><?= View::e($vehicle['code'] ?? '—') ?> • <?= View::e($vehicle['status'] ?? 'searching') ?></div>
+      <div class="font-bold">{{ vehicle.name !== '-' ? vehicle.name : '<?= View::e($vehicle['name'] ?? 'Mencari armada...') ?>' }}</div>
+      <div class="muted">{{ vehicle.code !== '-' ? vehicle.code + ' • ' + vehicle.status : '<?= View::e(($vehicle['code'] ?? '—') . ' • ' . ($vehicle['status'] ?? 'searching')) ?>' }}</div>
       <div class="muted text-xs mt-2"><i class="fa-solid fa-location-dot"></i> <?= View::e($order['destination_address']) ?></div>
       <div class="muted text-xs font-mono"><?= View::e($order['destination_latitude']) ?>, <?= View::e($order['destination_longitude']) ?></div>
     </div>
-    <div class="card p-4"><div class="muted text-xs mb-2">TIMELINE</div><ul id="timeline" class="space-y-1"><?php foreach ($logs as $l): ?><li class="flex gap-2 text-sm py-1"><span class="badge"><?= View::e($l['created_at']) ?></span><span><?= View::e($l['old_status'] ?? '—') ?> → <strong><?= View::e($l['new_status']) ?></strong></span></li><?php endforeach; ?></ul></div>
+    <div class="card p-4"><div class="muted text-xs mb-2">TIMELINE</div>
+      <ul v-if="logs.length" class="space-y-1" v-cloak><li v-for="(l, i) in logs" :key="i" class="flex gap-2 text-sm py-1"><span class="badge">{{ l.created_at }}</span><span>{{ l.old_status || '—' }} → <strong>{{ l.new_status }}</strong><span v-if="l.note"> • {{ l.note }}</span></span></li></ul>
+      <ul v-else id="timeline" class="space-y-1"><?php foreach ($logs as $l): ?><li class="flex gap-2 text-sm py-1"><span class="badge"><?= View::e($l['created_at']) ?></span><span><?= View::e($l['old_status'] ?? '—') ?> → <strong><?= View::e($l['new_status']) ?></strong></span></li><?php endforeach; ?></ul>
+    </div>
   </div>
+</div>
 </div>

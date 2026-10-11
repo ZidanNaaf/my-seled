@@ -12,11 +12,13 @@ $statusBadge = function ($s) {
 </div>
 
 <?php if ($active): ?>
+<div id="vue-home-active" data-code="<?= View::e($active['order_code']) ?>" data-status="<?= View::e($active['status']) ?>">
 <div class="card p-5 mt-4" style="border-color:#5a4413">
   <div class="flex justify-between items-center flex-wrap gap-2">
-    <div><div class="muted text-xs">PESANAN AKTIF</div><div class="font-bold text-lg"><?= View::e($active['order_code']) ?> <span class="badge <?= $statusBadge($active['status']) ?>"><?= View::e($active['status']) ?></span></div></div>
+    <div><div class="muted text-xs">PESANAN AKTIF • <span v-cloak class="text-[#F5F5F5]">live: {{ status }}</span></div><div class="font-bold text-lg"><?= View::e($active['order_code']) ?> <span class="badge <?= $statusBadge($active['status']) ?>"><?= View::e($active['status']) ?></span></div></div>
     <a href="/tracking/<?= View::e($active['order_code']) ?>" class="btn btn-primary text-sm"><i class="fa-solid fa-location-crosshairs"></i> Lacak Armada</a>
   </div>
+</div>
 </div>
 <?php else: ?>
 <div class="card p-6 mt-4 text-center">

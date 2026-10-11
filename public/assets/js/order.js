@@ -1,7 +1,15 @@
 // Order form: pilih paket + cegah double submit + idempotency
+// Jika Vue mount (#vue-order) aktif, seleksi paket diurus Vue agar tidak dobel.
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('order-form');
   if (!form) return;
+  if (document.getElementById('vue-order') && window.Vue) {
+    form.addEventListener('submit', () => {
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) { btn.disabled = true; btn.dataset.orig = btn.innerHTML; btn.innerHTML = 'Mengirim...'; }
+    });
+    return;
+  }
   const cards = form.querySelectorAll('[data-package]');
   const pkgInput = document.getElementById('package_id');
   const summary = document.getElementById('order-summary');

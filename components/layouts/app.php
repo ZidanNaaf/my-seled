@@ -15,10 +15,12 @@ unset($_SESSION['flash']);
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config = { theme: { extend: { colors: { base:'#171717', surface:'#202020', surface2:'#292929', line:'#383838' } } } }</script>
 <link rel="stylesheet" href="/assets/css/custom.css">
+<style>[v-cloak]{display:none!important}</style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 <link rel="icon" href="/favicon.ico">
 </head>
 <body class="min-h-screen">
@@ -69,5 +71,6 @@ unset($_SESSION['flash']);
 <script src="/assets/js/map.js"></script>
 <script src="/assets/js/order.js"></script>
 <script src="/assets/js/tracking.js"></script>
+<script defer src="/assets/js/vue/vue-app.js"></script>
 </body>
 </html>
