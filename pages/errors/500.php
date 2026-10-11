@@ -1,0 +1,1 @@
+<div class="card p-8 text-center mt-10"><div class="text-5xl"><i class="fa-solid fa-poop"></i></div><h1 class="text-2xl font-bold mt-2">500 — Toilet mampet</h1><p class="muted text-sm">Terjadi kesalahan internal. Tim kami (simulasi) sedang meluncur.</p><a href="/" class="btn btn-primary mt-4"><i class="fa-solid fa-house"></i> Beranda</a></div>

@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # Jangan rewrite file/dir yang benar-benar ada
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# Blokir akses file sensitif
+<FilesMatch "^(\.env|\.htaccess|\.git)">
+  Require all denied
+</FilesMatch>
+
+Options -Indexes

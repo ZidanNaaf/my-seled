@@ -1,0 +1,1 @@
+<div class="card p-8 text-center mt-10"><div class="text-5xl"><i class="fa-solid fa-ban"></i></div><h1 class="text-2xl font-bold mt-2">405 — Method salah</h1><p class="muted text-sm">Gunakan method HTTP yang benar.</p><a href="/" class="btn btn-primary mt-4"><i class="fa-solid fa-house"></i> Beranda</a></div>

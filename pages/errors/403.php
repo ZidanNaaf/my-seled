@@ -1,0 +1,1 @@
+<div class="card p-8 text-center mt-10"><div class="text-5xl"><i class="fa-solid fa-lock"></i></div><h1 class="text-2xl font-bold mt-2">403 — Tidak boleh masuk</h1><p class="muted text-sm"><?= isset($message) ? \App\Core\View::e($message) : 'Akses ditolak.' ?></p><a href="/" class="btn btn-primary mt-4"><i class="fa-solid fa-house"></i> Beranda</a></div>
